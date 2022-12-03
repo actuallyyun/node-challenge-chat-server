@@ -19,48 +19,49 @@ app.get("/", function (request, response) {
 });
 
 
-app.get("/messages", (req, res) => {
-  console.log(req.query)
-  if (req.query.id) {
-    const id = req.query.id
-    const message = messages.filter(message => message.id == id)
-    res.send(message)
 
-  } else if (req.query.search) {
+app.get("/messages/:id", (req, res) => {
+  const id = req.params.id
+  const message = messages.find(message => message.id == id)
+
+  res.send(message)
+
+})
+
+app.put("/messages/:id", (req, res) => {
+  const id = req.params.id
+  const message = messages.find(message => message.id == id)
+  message.text = req.body.text
+  message.from = req.body.from
+
+  res.send(message)
+})
+
+app.get("/messages", (req, res) => {
+
+  if (req.query.search) {
     const text = req.query.search.toLowerCase()
     const message = messages.filter(message => message.text.toLowerCase().includes(text))
     res.send(message)
-  } else if (req.query.latest) {
+  }
+
+  if (req.query.latest) {
     const latestMsg = messages.filter(message => message.id < 10)
     res.send(latestMsg)
-  } else {
+  }
+  if (Object.keys(req.query) === 0) {
     res.send(messages)
   }
 })
 
-// app.get("/messages/search", (req, res) => {
-//   const text = req.query
-//   console.log("req", req)
-//   console.log("text", text)
-//   res.send(req)
 
-// })
-
-// app.get("messages/latest", (res, req) => {
-//   const latestMsg = messages.filter(message => message.id < 10)
-//   res.send(latestMsg)
-// })
-
-// app.get("/messages/:id", (req, res) => {
-
-// })
-// - [ ] Read _only_ messages whose text contains a given substring: `/messages/search?text=express`
 
 
 app.post("/messages", (req, res) => {
   if (validMessage(req.body)) {
     const messageContent = req.body
-    const newMessage = { id: messages.length, from: messageContent.from, text: messageContent.text }
+    const timeSent = new Date()
+    const newMessage = { id: messages.length, from: messageContent.from, text: messageContent.text, timeSent: timeSent }
     messages.push(newMessage)
     res.send(newMessage)
 
@@ -89,3 +90,5 @@ app.delete("/messages/:id", (req, res) => {
 app.listen(3000, () => {
   console.log("Listening on port 3000")
 });
+
+
