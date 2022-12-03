@@ -20,22 +20,48 @@ app.get("/", function (request, response) {
 
 
 app.get("/messages", (req, res) => {
-  res.send(messages)
+  console.log(req.query)
+  if (req.query.id) {
+    const id = req.query.id
+    const message = messages.filter(message => message.id == id)
+    res.send(message)
+
+  } else if (req.query.search) {
+    const text = req.query.search.toLowerCase()
+    const message = messages.filter(message => message.text.toLowerCase().includes(text))
+    res.send(message)
+  } else if (req.query.latest) {
+    const latestMsg = messages.filter(message => message.id < 10)
+    res.send(latestMsg)
+  } else {
+    res.send(messages)
+  }
 })
 
-app.get("/messages/:id", (req, res) => {
-  const id = req.params.id
-  console.log(id)
-  const message = messages.filter(message => message.id == id)
-  res.send(message)
-})
+// app.get("/messages/search", (req, res) => {
+//   const text = req.query
+//   console.log("req", req)
+//   console.log("text", text)
+//   res.send(req)
+
+// })
+
+// app.get("messages/latest", (res, req) => {
+//   const latestMsg = messages.filter(message => message.id < 10)
+//   res.send(latestMsg)
+// })
+
+// app.get("/messages/:id", (req, res) => {
+
+// })
+// - [ ] Read _only_ messages whose text contains a given substring: `/messages/search?text=express`
+
 
 app.post("/messages", (req, res) => {
   if (validMessage(req.body)) {
     const messageContent = req.body
     const newMessage = { id: messages.length, from: messageContent.from, text: messageContent.text }
     messages.push(newMessage)
-    console.log("messages", messages)
     res.send(newMessage)
 
   } else {
