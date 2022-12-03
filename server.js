@@ -12,19 +12,13 @@ const welcomeMessage = {
   text: "Welcome to CYF chat system!",
 };
 
-//This array is our "data store".
-//We will start with one message in the array.
-//Note: messages will be lost when Glitch restarts our server.
 const messages = [welcomeMessage];
 
 app.get("/", function (request, response) {
   response.sendFile(__dirname + "/index.html");
 });
 
-// - [ ] Create a new message
-// - [ ] Read all messages
-// - [ ] Read one message specified by an ID
-// - [ ] Delete a message, by ID
+
 app.get("/messages", (req, res) => {
   res.send(messages)
 })
@@ -37,18 +31,32 @@ app.get("/messages/:id", (req, res) => {
 })
 
 app.post("/messages", (req, res) => {
-  const message = req.body
-  messages.push(message)
-  res.send(message)
+  if (validMessage(req.body)) {
+    const messageContent = req.body
+    const newMessage = { id: messages.length, from: messageContent.from, text: messageContent.text }
+    messages.push(newMessage)
+    console.log("messages", messages)
+    res.send(newMessage)
+
+  } else {
+    res.status(400).send("Invalid message content.")
+  }
+
 
 })
 
+const validMessage = (message) => {
+  if (message.from === undefined || message.text === undefined || message.from === "" || message.text === "") {
+    return false
+  } else {
+    return true
+  }
+}
 
 app.delete("/messages/:id", (req, res) => {
   const msgId = req.params.id
   const index = messages.findIndex(id => messages.id == msgId)
   messages.splice(index, 1)
-  console.log("aftr splice", messages)
   res.status(202).send({ success: true })
 })
 
